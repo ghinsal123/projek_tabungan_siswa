@@ -1,5 +1,5 @@
 <?php
-include "service/database.php"; // Hubungkan dengan database
+include "../service/database.php"; // Hubungkan dengan database
 
 if (isset($_POST['simpan'])) {
     $nama = $_POST['nama'];
@@ -12,7 +12,7 @@ if (isset($_POST['simpan'])) {
     if ($db->query($sql) === TRUE) {
         echo "<script>
             alert('Data berhasil disimpan!');
-            window.location.href = 'siswa.php';
+            window.location.href = 'index.php';
         </script>";
     } else {
         echo "Error: " . $sql . "<br>" . $conn->error;

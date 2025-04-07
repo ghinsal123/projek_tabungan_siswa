@@ -1,58 +1,27 @@
 <?php
-include "service/database.php";
-
-// Cek jika tombol logout ditekan
-if (isset($_POST['logout'])) {
-    session_start();
-    session_destroy();
-    echo "<script>window.location='login.php';</script>";
-    exit;
-}
+include "../service/database.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Pastikan nilai yang diterima tidak kosong dan valid
-    $id = isset($_POST['id_siswa']) ? trim($_POST['id_siswa']) : '';
-    $setoran = isset($_POST['saldo']) ? trim($_POST['saldo']) : '';
+    $id_tabungan = trim($_POST['id_tabungan']);
+    $id_siswa = trim($_POST['id_siswa']);
+    $jumlah = (int)$_POST['jumlah'];
 
-    // Debug: Memeriksa data POST yang dikirim
-    // var_dump($_POST);  // Hapus setelah selesai debugging
-
-    // Cek apakah nilai kosong atau tidak valid
-    if (empty($id)) {
-        echo "<script>alert('Harap pilih siswa!'); window.history.back();</script>";
+    if (empty($id_tabungan) || empty($id_siswa) || $jumlah <= 0) {
+        echo "<script>alert('Data tidak valid!'); window.history.back();</script>";
         exit;
     }
 
-    if (empty($setoran) || !is_numeric($setoran) || $setoran <= 0) {
-        echo "<script>alert('Harap masukkan jumlah setoran yang valid!'); window.history.back();</script>";
-        exit;
-    }
+    $stmt = $db->prepare("CALL SetoranAwal(?, ?, ?)");
+    $stmt->bind_param("ssi", $id_tabungan, $id_siswa, $jumlah);
 
-    // Escape nilai untuk keamanan
-    $id = $db->real_escape_string($id);
-    $setoran = (int)$setoran; // Pastikan saldo adalah integer
-
-    // Cek apakah siswa sudah memiliki tabungan
-    $checkSql = "SELECT * FROM tabungan WHERE id_siswa='$id'";
-    $result = $db->query($checkSql);
-
-    if ($result->num_rows > 0) {
-        // Jika sudah ada, update saldo
-        $updateSql = "UPDATE tabungan SET saldo = saldo + $setoran WHERE id_siswa='$id'";
-        if ($db->query($updateSql) === TRUE) {
-            echo "<script>alert('Setoran awal berhasil!'); window.location='tabungan.php';</script>";
-        } else {
-            echo "Error saat update: " . $db->error;
-        }
+    if ($stmt->execute()) {
+        echo "<script>alert('Setoran awal berhasil!'); window.location='index.php';</script>";
     } else {
-        // Jika belum ada, insert saldo baru
-        $insertSql = "INSERT INTO tabungan (id_siswa, tanggal, saldo) VALUES ('$id', NOW(), '$setoran')";
-        if ($db->query($insertSql) === TRUE) {
-            echo "<script>alert('Setoran awal berhasil!'); window.location='tabungan.php';</script>";
-        } else {
-            echo "Error saat insert: " . $db->error;
-        }
+        echo "<script>alert('Gagal melakukan setoran awal!'); window.history.back();</script>";
     }
+
+    $stmt->close();
+    $db->close();
 }
 ?>
 
@@ -214,28 +183,57 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="container">
         <h2>Setoran</h2>
         <form method="POST">
-    <label for="id_siswa">Pilih Siswa:</label>
-    <select name="id_siswa" required>
-        <option value="">-- Pilih Siswa --</option>
-        <?php
-        // Mengambil data siswa dari database
-        $sql = "SELECT * FROM siswa";
-        $result = $db->query($sql);
-        while ($row = $result->fetch_assoc()) {
-            echo "<option value='" . $row['id_siswa'] . "'>" . $row['nama'] . " (" . $row['kelas'] . ")</option>";
-        }
-        ?>
-    </select>
+            <label for="id_siswa">Id Siswa:</label>
+            <select name="id_siswa" id="id_siswa" required onchange="isiDataSiswa()">
+                <option value="">-- id siswa --</option>
+                <?php
+                // Ambil data siswa
+                $sql = "SELECT * FROM siswa";
+                $result = $db->query($sql);
+                $siswaData = [];
+                while ($row = $result->fetch_assoc()) {
+                    $siswaData[$row['id_siswa']] = [
+                        'nama' => $row['nama'],
+                        'kelas' => $row['kelas']
+                    ];
+                    echo "<option value='" . $row['id_siswa'] . "'>" . $row['id_siswa'] . "</option>";
+                }
+                ?>
+            </select>
 
-    <label for="saldo">Jumlah Setoran:</label>
-    <input type="number" name="saldo" min="1000" required>
+            <label for="nama">Nama Siswa:</label>
+            <input type="text" id="nama" name="nama" readonly>
 
-    <div class="form-buttons">
-        <button type="button" class="cancel-btn" onclick="window.history.back()">Batal</button>
-        <button type="submit" class="save-btn">Simpan</button>
+            <label for="kelas">Kelas:</label>
+            <input type="text" id="kelas" name="kelas" readonly>
+
+            <label for="tanggal">Tanggal:</label>
+            <input type="text" id="tanggal" name="tanggal" readonly value="<?php echo date('Y-m-d'); ?>">
+
+            <label for="saldo">Setoran Awal:</label>
+            <input type="number" name="saldo" min="1000" required>
+
+            <div class="form-buttons">
+                <button type="button" class="cancel-btn" onclick="window.history.back()">Batal</button>
+                <button type="submit" class="save-btn">Simpan</button>
+            </div>
+        </form>
+
+        <script>
+            // Data siswa dari PHP ke JS
+            const dataSiswa = <?php echo json_encode($siswaData); ?>;
+
+            function isiDataSiswa() {
+                const id = document.getElementById('id_siswa').value;
+                if (dataSiswa[id]) {
+                    document.getElementById('nama').value = dataSiswa[id].nama;
+                    document.getElementById('kelas').value = dataSiswa[id].kelas;
+                } else {
+                    document.getElementById('nama').value = '';
+                    document.getElementById('kelas').value = '';
+                }
+            }
+        </script>
     </div>
-</form>
-    </div>
-
 </body>
 </html>

@@ -1,5 +1,5 @@
 <?php
-include "service/database.php";
+include "../service/database.php";
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
@@ -16,7 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $updateSql = "UPDATE siswa SET nama='$nama', jurusan='$jurusan', kelas='$kelas' WHERE id_siswa='$id'";
     
     if ($db->query($updateSql) === TRUE) {
-        echo "<script>alert('Data berhasil diperbarui!'); window.location='siswa.php';</script>";
+        echo "<script>alert('Data berhasil diperbarui!'); window.location='index.php';</script>";
     } else {
         echo "Error: " . $conn->error;
     }
@@ -194,7 +194,7 @@ $db->close();
             </select>
 
             <div class="buttons">
-                <a href="siswa.php"><button type="button" class="btn-cancel">Batal</button></a>
+                <button type="button" class="btn-cancel" onclick="window.history.back()">Batal</button>
                 <button type="submit" class="btn-save">Simpan Perubahan</button>
             </div>
         </form>

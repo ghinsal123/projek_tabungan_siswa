@@ -1,5 +1,5 @@
 <?php
-include "service/database.php";
+include "../service/database.php";
 
 // Ambil data tabungan dari database
 $sql = "SELECT tabungan.id_tabungan, siswa.id_siswa, siswa.nama, tabungan.tanggal, tabungan.saldo 
@@ -8,6 +8,41 @@ $sql = "SELECT tabungan.id_tabungan, siswa.id_siswa, siswa.nama, tabungan.tangga
         ORDER BY tabungan.tanggal DESC";
 
 $result = $db->query($sql);
+
+// Agregat saldo
+$agregat = '';
+$label = '';
+$hasil_agregat = null;
+
+if (isset($_GET['agregat']) && !empty($_GET['agregat'])) {
+    $filter = $_GET['agregat'];
+
+    switch ($filter) {
+        case 'max':
+            $agregat = "SELECT MAX(saldo) AS hasil FROM tabungan";
+            $label = "Saldo Tertinggi";
+            break;
+        case 'min':
+            $agregat = "SELECT MIN(saldo) AS hasil FROM tabungan";
+            $label = "Saldo Terendah";
+            break;
+        case 'avg':
+            $agregat = "SELECT AVG(saldo) AS hasil FROM tabungan";
+            $label = "Rata-rata Saldo";
+            break;
+        case 'sum':
+            $agregat = "SELECT SUM(saldo) AS hasil FROM tabungan";
+            $label = "Total Saldo";
+            break;
+    }
+
+    if ($agregat !== '') {
+        $res = $db->query($agregat);
+        $row = $res->fetch_assoc();
+        $hasil_agregat = number_format($row['hasil'], 0, ',', '.');
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -97,11 +132,18 @@ $result = $db->query($sql);
             cursor: pointer;
             transition: background 0.3s ease;
         }
-        .btn-setor {
+        .btn-setorawal {
+            background-color:rgb(19, 194, 77);
+            color: white;
+        }
+        .btn-setorawal:hover {
+            background-color:rgb(0, 179, 48);
+        }
+        .btn-tambahsetor {
             background-color: #007bff;
             color: white;
         }
-        .btn-setor:hover {
+        .btn-tambahsetor:hover {
             background-color: #0056b3;
         }
         .btn-tarik {
@@ -169,10 +211,10 @@ $result = $db->query($sql);
     <div class="navbar">
         <div class="logo">TS</div>
         <div class="menu">
-            <a href="dashboard.php">Dashboard</a>
-            <a href="siswa.php">Siswa</a>
-            <a href="tabungan.php">Tabungan</a>
-            <form action="dashboard.php" method="POST">
+            <a href="../dashboard.php">Dashboard</a>
+            <a href="../siswa/index.php">Siswa</a>
+            <a href="../tabungan/index.php">Tabungan</a>
+            <form action="../dashboard.php" method="POST">
                 <button type="submit" name="logout">Logout</button>
             </form>
         </div>
@@ -181,9 +223,25 @@ $result = $db->query($sql);
     <div class="container">
         <h3>Tabungan Siswa</h3>
         <div class="buttons">
-            <a href="setoran.php"><button class="btn-setor">Setoran</button></a>
+            <a href="setoran_awal.php"><button class="btn-setorawal">Setoran Awal</button></a>
+            <a href="tambah_setoran.php"><button class="btn-tambahsetor">Tambah Setoran</button></a>
             <a href="penarikan.php"><button class="btn-tarik">Penarikan</button></a>
         </div>
+        <form method="GET" style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
+            <label for="agregat">Lihat Agregat:</label>
+            <select name="agregat" id="agregat" onchange="this.form.submit()">
+                <option value="">-- Pilih --</option>
+                <option value="max" <?php if ($_GET['agregat'] == 'max') echo 'selected'; ?>>Saldo Tertinggi</option>
+                <option value="min" <?php if ($_GET['agregat'] == 'min') echo 'selected'; ?>>Saldo Terendah</option>
+                <option value="avg" <?php if ($_GET['agregat'] == 'avg') echo 'selected'; ?>>Rata-rata Saldo</option>
+                <option value="sum" <?php if ($_GET['agregat'] == 'sum') echo 'selected'; ?>>Total Saldo</option>
+            </select>
+        </form>
+
+        <?php if ($hasil_agregat !== null): ?>
+            <p><strong><?php echo $label; ?>:</strong> Rp <?php echo $hasil_agregat; ?></p>
+        <?php endif; ?>
+
         <table>
             <thead>
                 <tr>
@@ -196,22 +254,23 @@ $result = $db->query($sql);
             </thead>
             <tbody>
                 <?php
-                $no = 1;
-                while ($row = $result->fetch_assoc()) {
-                    echo "<tr>";
-                    echo "<td>{$no}</td>";
-                    echo "<td>{$row['nama']}</td>";
-                    echo "<td>" . date("d F Y", strtotime($row['tanggal'])) . "</td>";
-                    echo "<td>Rp " . number_format($row['saldo'], 0, ',', '.') . "</td>";
-                    echo "<td><a href='edit_tabungan.php?id_tabungan={$row['id_tabungan']}'><button class='btn-edit'>Edit</button></a> 
-                        <form method='POST' action='hapus_tabungan.php' style='display:inline;'>
-                        <input type='hidden' name='id_tabungan' value='{$row['id_tabungan']}'>
-                        <button type='submit' class='btn-delete'>Hapus</button>
-                        </form>
+                    $no = 1;
+                    while ($row = $result->fetch_assoc()) {
+                        echo "<tr>";
+                        echo "<td>{$no}</td>";
+                        echo "<td>{$row['nama']}</td>";
+                        echo "<td>" . date("d F Y", strtotime($row['tanggal'])) . "</td>";
+                        echo "<td>Rp " . number_format($row['saldo'], 0, ',', '.') . "</td>";
+                        echo "<td>
+                        <a href='detail_riwayat.php?id_tabungan={$row['id_tabungan']}'><button class='btn-edit'>Detail</button></a> 
+                            <form method='POST' action='hapus_tabungan.php' style='display:inline;' onsubmit=\"return confirm('Apakah kamu yakin ingin menghapus data ini?');\">
+                                <input type='hidden' name='id_tabungan' value='{$row['id_tabungan']}'>
+                                <button type='submit' class='btn-delete'>Hapus</button>
+                            </form>
                         </td>";
-                    echo "</tr>";
-                    $no++;
-                }
+                        echo "</tr>";
+                        $no++;
+                    }
                 ?>
             </tbody>
         </table>

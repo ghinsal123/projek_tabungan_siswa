@@ -1,5 +1,5 @@
 <?php
-include "service/database.php"; // Koneksi ke database
+include "../service/database.php"; // Koneksi ke database
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
@@ -12,12 +12,12 @@ if (isset($_GET['id'])) {
     if ($stmt->execute()) {
         echo "<script>
                 alert('Data berhasil dihapus!');
-                window.location.href = 'siswa.php';
+                window.location.href = 'index.php';
               </script>";
     } else {
         echo "<script>
                 alert('Gagal menghapus data!');
-                window.location.href = 'siswa.php';
+                window.location.href = 'index.php';
               </script>";
     }
 
@@ -26,7 +26,7 @@ if (isset($_GET['id'])) {
 } else {
     echo "<script>
             alert('ID tidak ditemukan!');
-            window.location.href = 'siswa.php';
+            window.location.href = 'index.php';
           </script>";
 }
 ?>

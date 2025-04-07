@@ -81,7 +81,7 @@
     <div class="home">
         <h1>Tabungan Siswa/i <br> SMKN 1 KOTA BEKASI</h1>
         <p>Web pencatatan tabungan siswa/i yang modern & mudah digunakan.</p>
-        <a href="login.php" class="btn-masuk">Masuk</a>
+        <a href="modul/login.php" class="btn-masuk">Masuk</a>
     </div>
 
     <footer>

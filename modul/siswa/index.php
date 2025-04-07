@@ -1,9 +1,19 @@
 <?php
-include "service/database.php"; // Hubungkan dengan database
+include "../service/database.php"; // Hubungkan dengan database
 
 // Ambil data siswa dari database
 $sql = "SELECT * FROM siswa";
 $result = $db->query($sql);
+
+// Ambil data siswa dari database
+$where = '';
+if (isset($_GET['search']) && !empty($_GET['search'])) {
+    $keyword = $db->real_escape_string($_GET['search']);
+    $where = "WHERE nama LIKE '%$keyword%'";
+}
+$sql = "SELECT * FROM siswa $where";
+$result = $db->query($sql);
+
 ?>
 
 <!DOCTYPE html>
@@ -185,10 +195,10 @@ $result = $db->query($sql);
     <div class="navbar">
         <div class="logo">TS</div>
         <div class="menu">
-            <a href="dashboard.php">Dashboard</a>
-            <a href="siswa.php">Siswa</a>
-            <a href="tabungan.php">Tabungan</a>
-            <form action="dashboard.php" method="POST">
+            <a href="../dashboard.php">Dashboard</a>
+            <a href="index.php">Siswa</a>
+            <a href="../tabungan/index.php">Tabungan</a>
+            <form action="../dashboard.php" method="POST">
                 <button type="submit" name="logout">Logout</button>
             </form>
         </div>
@@ -200,6 +210,7 @@ $result = $db->query($sql);
         <div class="search-add">
             <div>
                 <input type="text" id="search" placeholder="Cari nama siswa">
+                <div id="hasil-pencarian"></div>
             </div>
             <a href="tambah_data_siswa.php"><button type="button">Tambah Data</button></a>
         </div>
@@ -226,7 +237,9 @@ $result = $db->query($sql);
                                 <td>".$row['kelas']."</td>
                                 <td>
                                     <a href='edit_data_siswa.php?id=".$row['id_siswa']."'><button>Edit</button></a>
-                                    <a href='hapus_data_siswa.php?id=".$row['id_siswa']."' onclick='return confirm(\"Yakin ingin menghapus?\")'><button>Hapus</button></a>
+                                    <a href='hapus_data_siswa.php?id=".$row['id_siswa']."' onclick='return confirm(\"Yakin ingin menghapus?\")'>
+                                        <button style='background-color: red; color: white;'>Hapus</button>
+                                    </a>
                                 </td>
                               </tr>";
                     }
@@ -238,5 +251,20 @@ $result = $db->query($sql);
             </tbody>
         </table>
     </div>
+    <script>
+        document.getElementById('search').addEventListener('keyup', function() {
+            let keyword = this.value;
+
+            fetch(`?search=${encodeURIComponent(keyword)}`)
+                .then(response => response.text())
+                .then(html => {
+                    // Ambil hanya tbody isi tabel dari respon
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const tbody = doc.querySelector('tbody').innerHTML;
+                    document.querySelector('tbody').innerHTML = tbody;
+                });
+        });
+    </script>
 </body>
 </html>

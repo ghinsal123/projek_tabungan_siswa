@@ -1,35 +1,30 @@
 <?php
     include "service/database.php";
-    $register_message = "";
+    session_start();
 
-    if(isset($_POST['register'])){
+    $login_message = "";
+
+    if(isset($_SESSION["is_login"])) {
+        header("location: dashboard.php");
+    }
+
+    if(isset($_POST['login'])){
         $username = $_POST['username'];
         $password = $_POST['password'];
-        $confirm_password = $_POST['confirm_password'];
+        $hash_password = hash('sha256', $password);
 
-        // Check if passwords match
-        if ($password !== $confirm_password) {
-            $register_message = "Passwords do not match.";
+        $sql = "SELECT * FROM users WHERE username='$username' AND password='$hash_password'";
+        $result = $db->query($sql);
+
+        if($result->num_rows > 0){
+            $data = $result->fetch_assoc();
+            $_SESSION["username"] = $data["username"];
+            $_SESSION["is_login"] = true;
+
+            header ("location: dashboard.php");
+
         } else {
-            $hash_password = hash('sha256', $password);
-
-            // Check if username already exists
-            $sql = "SELECT * FROM users WHERE username='$username'";
-            $result = $db->query($sql);
-
-            if($result->num_rows > 0) {
-                $register_message = "Username already taken.";
-            } else {
-                // Insert new user into database
-                $sql = "INSERT INTO users (username, password) VALUES ('$username', '$hash_password')";
-                if ($db->query($sql) === TRUE) {
-                    $register_message = "Registration successful! Please login.";
-                    header("Location: login.php"); // Redirect to login after successful registration
-                    exit();
-                } else {
-                    $register_message = "Error: " . $db->error;
-                }
-            }
+            $login_message = "Account not found!";
         }
         $db->close();
     }
@@ -40,9 +35,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
+    <title>Login</title>
     <style>
-        /* Reusing the same styles from your login page for consistency */
+        /* Same styling as the register page for consistency */
         body {
             font-family: 'Arial', sans-serif;
             background-color: #f4f4f9;
@@ -118,45 +113,41 @@
             text-align: center;
             margin-bottom: 15px;
         }
-        .login-link {
+        .register-link {
             display: block;
             text-align: center;
             margin-top: 15px;
         }
-        .login-link a {
+        .register-link a {
             color: #007BFF;
             text-decoration: none;
             font-size: 14px;
         }
-        .login-link a:hover {
+        .register-link a:hover {
             text-decoration: underline;
         }
-
     </style>
 </head>
 <body>
     <div class="login-container">
         <div class="login-box">
-            <h2>Register</h2>
-            <?php if ($register_message): ?>
-                <p class="error-message"><?= $register_message ?></p>
+            <h2>Login</h2>
+            <?php if ($login_message): ?>
+                <p class="error-message"><?= $login_message ?></p>
             <?php endif; ?>
-            <form action="register.php" method="POST">
+            <form action="login.php" method="POST">
                 <div class="form-input">
                     <input type="text" placeholder="Masukkan ussername anda" name="username" required />
                 </div>
                 <div class="form-input">
-                    <input type="password" placeholder="Masukkan password anda" name="password" required />
+                    <input type="password" placeholder="Masukaan password anda" name="password" required />
                 </div>
-                <div class="form-input">
-                    <input type="password" placeholder="Konfirmasi password anda" name="confirm_password" required />
-                </div>
-                <div class="login-link">
-                <p>Sudah punya akun? <a href="login.php">Masuk disini</a></p>
+                <div class="register-link">
+                <p>Belum punya akun? <a href="register.php">Registrasi disini</a></p>
                 </div>
                 <div class="form-actions">
-                    <a href="index.php"><button type="button" class="button-cancel">Batal</button></a>
-                    <button type="submit" name="login" class="button-submit">Daftar</button>
+                    <a href="../index.php"><button type="button" class="button-cancel">Batal</button></a>
+                    <button type="submit" name="login" class="button-submit">Masuk</button>
                 </div>
             </form>
         </div>

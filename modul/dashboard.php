@@ -5,7 +5,7 @@
     if(isset($_POST['logout'])){
         session_unset();
         session_destroy();
-        header('location: index.php');
+        header('location: ../index.php');
     }
 
     // Fetch the number of students from the 'siswa' table
@@ -213,9 +213,9 @@
         <div class="logo">TS</div>
         <div class="menu">
             <a href="dashboard.php">Dashboard</a>
-            <a href="siswa.php">Siswa</a>
-            <a href="tabungan.php">Tabungan</a>
-            <form action="dashboard.php" method="POST">
+            <a href="siswa/index.php">Siswa</a>
+            <a href="tabungan/index.php">Tabungan</a>
+            <form action="../modul/dashboard.php" method="POST">
                 <button type="submit" name="logout">Logout</button>
             </form>
         </div>
@@ -228,7 +228,7 @@
     <!-- Stats Cards -->
     <div class="stats">
         <!-- First row: Jumlah Siswa & Jumlah Setoran -->
-        <a href="siswa.php">
+        <a href="siswa/index.php">
             <div class="card">
                 <div class="icon">👥</div>
                 <div class="details">
@@ -237,7 +237,7 @@
                 </div>
             </div>
         </a>
-        <a href="tabungan.php">
+        <a href="tabungan/index.php">
             <div class="card">
                 <div class="icon">💰</div>
                 <div class="details">
