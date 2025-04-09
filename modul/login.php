@@ -20,6 +20,7 @@
             $data = $result->fetch_assoc();
             $_SESSION["username"] = $data["username"];
             $_SESSION["is_login"] = true;
+            $_SESSION["role"] = $data["role"];
 
             header ("location: dashboard.php");
 

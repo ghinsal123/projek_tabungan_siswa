@@ -1,6 +1,12 @@
 <?php
+session_start(); // WAJIB ada sebelum pakai $_SESSION
 include "../service/database.php";
 
+// Cek role: hanya admin yang bisa akses
+if (!isset($_SESSION["role"]) || $_SESSION["role"] !== 'admin') {
+    echo "<script>alert('Kamu tidak punya akses ke fitur ini!'); window.location='index.php';</script>";
+    exit();
+}
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
     $sql = "SELECT * FROM siswa WHERE id_siswa='$id'";
@@ -18,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($db->query($updateSql) === TRUE) {
         echo "<script>alert('Data berhasil diperbarui!'); window.location='index.php';</script>";
     } else {
-        echo "Error: " . $conn->error;
+        echo "Error: " . $db->error;
     }
 }
 
@@ -181,9 +187,14 @@ $db->close();
 
             <label>Jurusan:</label>
             <select name="jurusan" required>
-                <option value="RPL" <?php echo ($row['jurusan'] == 'RPL') ? 'selected' : ''; ?>>RPL</option>
-                <option value="TKJ" <?php echo ($row['jurusan'] == 'TKJ') ? 'selected' : ''; ?>>TKJ</option>
-                <option value="DKV" <?php echo ($row['jurusan'] == 'DKV') ? 'selected' : ''; ?>>DKV</option>
+                <option value="RPL" <?php if ($row['jurusan'] == 'RPL') echo 'selected'; ?>>RPL</option>
+                <option value="TKJ" <?php if ($row['jurusan'] == 'TKJ') echo 'selected'; ?>>TKJ</option>
+                <option value="DKV" <?php if ($row['jurusan'] == 'DKV') echo 'selected'; ?>>DKV</option>
+                <option value="AK" <?php if ($row['jurusan'] == 'AK') echo 'selected'; ?>>AK</option>
+                <option value="DPB" <?php if ($row['jurusan'] == 'DPB') echo 'selected'; ?>>DPB</option>
+                <option value="TP" <?php if ($row['jurusan'] == 'TP') echo 'selected'; ?>>TP</option>
+                <option value="TPL" <?php if ($row['jurusan'] == 'TPL') echo 'selected'; ?>>TPL</option>
+                <option value="TKR" <?php if ($row['jurusan'] == 'TKR') echo 'selected'; ?>>TKR</option>
             </select>
 
             <label>Kelas:</label>

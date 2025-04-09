@@ -23,9 +23,10 @@
     $totalSaldo = 0;
     if ($resultSaldo->num_rows > 0) {
         $rowSaldo = $resultSaldo->fetch_assoc();
-        $totalSaldo = $rowSaldo['total_saldo'];
+        $totalSaldo = isset($rowSaldo['total_saldo']) ? (float)$rowSaldo['total_saldo'] : 0;
     }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -169,6 +170,12 @@
             width: 100%;
             bottom: 0;
         }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
 
         /* Responsive Design */
         @media (max-width: 1024px) {
@@ -221,53 +228,54 @@
         </div>
     </div>
 
-    <div class="kotak1">
-        <h3>Selamat datang, <?= $_SESSION["username"]?></h3>
-    </div>
+    <div class="container">
+        <div class="kotak1">
+            <h3>Selamat datang, <?= $_SESSION["username"]?></h3>
+        </div>
 
-    <!-- Stats Cards -->
-    <div class="stats">
-        <!-- First row: Jumlah Siswa & Jumlah Setoran -->
-        <a href="siswa/index.php">
-            <div class="card">
-                <div class="icon">👥</div>
-                <div class="details">
-                    <h3><?= $jumlahSiswa ?></h3>
-                    <p>Jumlah Siswa</p>
+        <!-- Stats Cards -->
+        <div class="stats">
+            <!-- First row: Jumlah Siswa & Jumlah Setoran -->
+            <a href="siswa/index.php">
+                <div class="card">
+                    <div class="icon">👥</div>
+                    <div class="details">
+                        <h3><?= $jumlahSiswa ?></h3>
+                        <p>Jumlah Siswa</p>
+                    </div>
                 </div>
-            </div>
-        </a>
-        <a href="tabungan/index.php">
-            <div class="card">
-                <div class="icon">💰</div>
-                <div class="details">
-                    <h3>Rp <?= number_format($totalSaldo, 0, ',', '.') ?></h3>
-                    <p>Jumlah Setoran</p>
+            </a>
+            <a href="tabungan/index.php">
+                <div class="card">
+                    <div class="icon">💰</div>
+                    <div class="details">
+                        <h3>Rp <?= number_format($totalSaldo, 0, ',', '.') ?></h3>
+                        <p>Jumlah Setoran</p>
+                    </div>
                 </div>
-            </div>
-        </a>
-    </div>
-
-    <div class="stats">
-        <!-- Second row: Jumlah Penarikan & Jumlah Saldo -->
-        <a href="penarikan.php">
-            <div class="card">
-                <div class="icon">📤</div>
-                <div class="details">
-                    <h3>Rp 3,000</h3>
-                    <p>Jumlah Penarikan</p>
+            </a>
+        </div>
+        <div class="stats">
+            <!-- Second row: Jumlah Penarikan & Jumlah Saldo -->
+            <a href="penarikan.php">
+                <div class="card">
+                    <div class="icon">📤</div>
+                    <div class="details">
+                        <h3>Rp 3,000</h3>
+                        <p>Jumlah Penarikan</p>
+                    </div>
                 </div>
-            </div>
-        </a>
-        <a href="saldo.php">
-            <div class="card">
-                <div class="icon">📖</div>
-                <div class="details">
-                    <h3>Rp 5,000</h3>
-                    <p>Jumlah Saldo</p>
+            </a>
+            <a href="saldo.php">
+                <div class="card">
+                    <div class="icon">📖</div>
+                    <div class="details">
+                        <h3>Rp 5,000</h3>
+                        <p>Jumlah Saldo</p>
+                    </div>
                 </div>
-            </div>
-        </a>
+            </a>
+        </div>
     </div>
 
 </body>

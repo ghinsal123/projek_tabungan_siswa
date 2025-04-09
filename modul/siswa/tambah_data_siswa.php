@@ -1,6 +1,12 @@
 <?php
+session_start(); // WAJIB ada sebelum pakai $_SESSION
 include "../service/database.php"; // Hubungkan dengan database
 
+// Cek role: hanya admin yang bisa akses
+if (!isset($_SESSION["role"]) || $_SESSION["role"] !== 'admin') {
+    echo "<script>alert('Kamu tidak punya akses ke fitur ini!'); window.location='index.php';</script>";
+    exit();
+}
 if (isset($_POST['simpan'])) {
     $nama = $_POST['nama'];
     $kelas = $_POST['kelas'];
@@ -15,7 +21,7 @@ if (isset($_POST['simpan'])) {
             window.location.href = 'index.php';
         </script>";
     } else {
-        echo "Error: " . $sql . "<br>" . $conn->error;
+        echo "Error: " . $sql . "<br>" . $db->error;
     }
 
     $db->close();
@@ -201,11 +207,11 @@ if (isset($_POST['simpan'])) {
                 <option value="RPL">RPL</option>
                 <option value="DKV">DKV</option>
                 <option value="TKJ">TKJ</option>
-                <option value="TKJ">AK</option>
-                <option value="TKJ">DPB</option>
-                <option value="TKJ">TP</option>
-                <option value="TKJ">TPL</option>
-                <option value="TKJ">TKR</option>
+                <option value="AK">AK</option>
+                <option value="DPB">DPB</option>
+                <option value="TP">TP</option>
+                <option value="TPL">TPL</option>
+                <option value="TKR">TKR</option>
             </select>
 
             <!-- Action Buttons: Save and Cancel -->

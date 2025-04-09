@@ -21,7 +21,7 @@
                 $register_message = "Username already taken.";
             } else {
                 // Insert new user into database
-                $sql = "INSERT INTO users (username, password) VALUES ('$username', '$hash_password')";
+                $sql = "INSERT INTO users (username, password, role) VALUES ('$username', '$hash_password', 'user')";
                 if ($db->query($sql) === TRUE) {
                     $register_message = "Registration successful! Please login.";
                     header("Location: login.php"); // Redirect to login after successful registration
@@ -156,7 +156,7 @@
                 </div>
                 <div class="form-actions">
                     <a href="../index.php"><button type="button" class="button-cancel">Batal</button></a>
-                    <button type="submit" name="login" class="button-submit">Daftar</button>
+                    <button type="submit" name="register" class="button-submit">Daftar</button>
                 </div>
             </form>
         </div>

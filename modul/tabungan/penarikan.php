@@ -1,5 +1,12 @@
 <?php
+session_start(); // WAJIB ada sebelum pakai $_SESSION
 include "../service/database.php";
+
+// Cek role: hanya admin yang bisa akses
+if (!isset($_SESSION["role"]) || $_SESSION["role"] !== 'admin') {
+    echo "<script>alert('Kamu tidak punya akses ke fitur ini!'); window.location='index.php';</script>";
+    exit();
+}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $id_tabungan = isset($_POST['id_tabungan']) ? trim($_POST['id_tabungan']) : '';
@@ -15,10 +22,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
-    $id_tabungan = $db->real_escape_string($id_tabungan);
+    $id_tabungan = (int)$id_tabungan;
     $jumlah_penarikan = (int)$jumlah_penarikan;
 
-    // Panggil prosedur simpan penarikan
     $query = "CALL ProsesPenarikan('$id_tabungan', $jumlah_penarikan)";
     if ($db->query($query)) {
         echo "<script>alert('Penarikan berhasil!'); window.location='index.php';</script>";

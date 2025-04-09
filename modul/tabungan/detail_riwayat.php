@@ -1,5 +1,12 @@
 <?php
+session_start(); // WAJIB ada sebelum pakai $_SESSION
 include "../service/database.php";
+
+// Cek role: hanya admin yang bisa akses
+if (!isset($_SESSION["role"]) || $_SESSION["role"] !== 'admin') {
+    echo "<script>alert('Kamu tidak punya akses ke fitur ini!'); window.location='index.php';</script>";
+    exit();
+}
 
 if (isset($_GET['id_tabungan'])) {
     $id_tabungan = $_GET['id_tabungan'];
@@ -21,7 +28,7 @@ if (isset($_GET['id_tabungan'])) {
         exit;
     }
 
-    $sqlRiwayat = "SELECT tanggal, jenis, jumlah FROM riwayat_transaksi 
+    $sqlRiwayat = "SELECT tanggal, jenis, jumlah FROM detail_tabungan
                    WHERE id_tabungan = '$id_tabungan' ORDER BY tanggal DESC";
     $riwayat = $db->query($sqlRiwayat);
 } else {
